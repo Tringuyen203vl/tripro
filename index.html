@@ -69,6 +69,44 @@
             margin-top: 10px;
         }
 
+        /* Button styling */
+        #toggleButton {
+            margin-top: 30px;
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #toggleButton:hover {
+            background-color: #45a049;
+        }
+
+        /* Data list styling */
+        #dataList {
+            display: none;
+            margin-top: 20px;
+            list-style-type: none;
+            padding: 0;
+            background-color: #ffffff;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        #dataList li {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #333;
+        }
+
         /* Responsive Design */
         @media (max-width: 600px) {
             .data-item {
@@ -79,7 +117,7 @@
     <script>
         // Hàm để lấy dữ liệu từ ThingSpeak
         async function fetchData() {
-            const channelID = ' 2783657'; // Thay bằng Channel ID của bạn
+            const channelID = '2783657'; // Thay bằng Channel ID của bạn
             const apiKey = 'FZUQDUYN7ON76T8P';  // Thay bằng API Read Key của bạn
             const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=1`;
 
@@ -95,11 +133,20 @@
                 document.getElementById('field1').innerText = feed.field1 || 'Không có dữ liệu';
                 document.getElementById('field2').innerText = feed.field2 || 'Không có dữ liệu';
                 document.getElementById('timestamp').innerText = feed.created_at ? new Date(feed.created_at).toLocaleString() : 'Không có dữ liệu';
+
+                // Cập nhật dữ liệu trong danh sách
+                document.getElementById('listField1').innerText = feed.field1 || 'Không có dữ liệu';
+                document.getElementById('listField2').innerText = feed.field2 || 'Không có dữ liệu';
+                document.getElementById('listTimestamp').innerText = feed.created_at ? new Date(feed.created_at).toLocaleString() : 'Không có dữ liệu';
             } catch (error) {
                 console.error('Lỗi khi lấy dữ liệu:', error);
                 document.getElementById('field1').innerText = 'Lỗi';
                 document.getElementById('field2').innerText = 'Lỗi';
                 document.getElementById('timestamp').innerText = 'Lỗi';
+
+                document.getElementById('listField1').innerText = 'Lỗi';
+                document.getElementById('listField2').innerText = 'Lỗi';
+                document.getElementById('listTimestamp').innerText = 'Lỗi';
             }
         }
 
@@ -109,7 +156,20 @@
             setInterval(fetchData, 3000); // Lấy dữ liệu mỗi 3 giây
         }
 
-        window.onload = startAutoUpdate;
+        // Hàm để toggle hiển thị danh sách
+        function toggleList() {
+            const dataList = document.getElementById('dataList');
+            if (dataList.style.display === 'none' || dataList.style.display === '') {
+                dataList.style.display = 'block';
+            } else {
+                dataList.style.display = 'none';
+            }
+        }
+
+        window.onload = function() {
+            startAutoUpdate();
+            document.getElementById('toggleButton').addEventListener('click', toggleList);
+        };
     </script>
 </head>
 <body>
@@ -117,16 +177,26 @@
     <div class="data-container">
         <div class="data-item">
             <h2>ESP ID</h2>
-            <p id="ESP ID">Đang tải...</p>
+            <p id="field1">Đang tải...</p>
         </div>
         <div class="data-item">
             <h2>Fingerprint ID</h2>
-            <p id="Fingerprint ID">Đang tải...</p>
+            <p id="field2">Đang tải...</p>
         </div>
         <div class="data-item" style="width: 100%; text-align: center;">
             <h2>Thời gian</h2>
             <p id="timestamp" class="timestamp">Đang tải...</p>
         </div>
     </div>
+
+    <!-- Nút để hiển thị danh sách -->
+    <button id="toggleButton">Hiển thị danh sách</button>
+
+    <!-- Danh sách dữ liệu -->
+    <ul id="dataList">
+        <li><strong>ESP ID:</strong> <span id="listField1">Đang tải...</span></li>
+        <li><strong>Fingerprint ID:</strong> <span id="listField2">Đang tải...</span></li>
+        <li><strong>Thời gian:</strong> <span id="listTimestamp">Đang tải...</span></li>
+    </ul>
 </body>
 </html>
