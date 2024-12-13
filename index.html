@@ -4,37 +4,83 @@
     <meta charset="UTF-8">
     <title>Dashboard Cập Nhật Tự Động</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f0f0f0;
-            padding-top: 50px;
+        /* Reset một số thiết lập mặc định */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
         h1 {
             color: #333;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
+
         .data-container {
-            background-color: #fff;
-            padding: 20px;
-            margin: 20px auto;
-            border-radius: 10px;
-            width: 300px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
         }
+
         .data-item {
-            margin: 10px 0;
-            font-size: 1.2em;
+            background-color: #ffffff;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 20px;
+            width: 220px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
+
+        .data-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+        }
+
+        .data-item h2 {
+            font-size: 1.2em;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .data-item p {
+            font-size: 1.5em;
+            color: #555;
+        }
+
         .timestamp {
-            color: #666;
             font-size: 0.9em;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .data-item {
+                width: 100%;
+            }
         }
     </style>
     <script>
         // Hàm để lấy dữ liệu từ ThingSpeak
         async function fetchData() {
-            const channelID = 'YOUR_CHANNEL_ID'; // Thay bằng Channel ID của bạn
-            const apiKey = 'YOUR_READ_API_KEY';  // Thay bằng API Read Key của bạn
+            const channelID = '2783657'; // Thay bằng Channel ID của bạn
+            const apiKey = 'FZUQDUYN7ON76T8P';  // Thay bằng API Read Key của bạn
             const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=1`;
 
             try {
@@ -69,9 +115,18 @@
 <body>
     <h1>Dashboard ThingSpeak</h1>
     <div class="data-container">
-        <div class="data-item">Field1: <span id="field1">Đang tải...</span></div>
-        <div class="data-item">Field2: <span id="field2">Đang tải...</span></div>
-        <div class="data-item timestamp">Thời gian: <span id="timestamp">Đang tải...</span></div>
+        <div class="data-item">
+            <h2>Field1</h2>
+            <p id="field1">Đang tải...</p>
+        </div>
+        <div class="data-item">
+            <h2>Field2</h2>
+            <p id="field2">Đang tải...</p>
+        </div>
+        <div class="data-item" style="width: 100%; text-align: center;">
+            <h2>Thời gian</h2>
+            <p id="timestamp" class="timestamp">Đang tải...</p>
+        </div>
     </div>
 </body>
 </html>
