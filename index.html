@@ -231,7 +231,16 @@
         async function fetchHistoricalData(startDate, endDate) {
             const channelID = '2783657'; // Thay bằng Channel ID của bạn
             const apiKey = 'FZUQDUYN7ON76T8P';  // Thay bằng API Read Key của bạn
-            const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&start=${startDate}&end=${endDate}&timezone=UTC`;
+
+            // Nếu startDate và endDate giống nhau, đặt endDateTime là cuối ngày
+            let endDateTime = endDate;
+            if (startDate === endDate) {
+                endDateTime = `${endDate}T23:59:59Z`;
+            } else {
+                endDateTime = `${endDate}T23:59:59Z`;
+            }
+
+            const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&start=${startDate}T00:00:00Z&end=${endDateTime}&timezone=UTC`;
 
             try {
                 const response = await fetch(url);
@@ -244,6 +253,9 @@
                 if (feeds.length === 0) {
                     // Hiển thị thông báo không có dữ liệu
                     document.getElementById('filterMessage').innerText = 'Dữ liệu không tồn tại.';
+                    // Xóa bảng nếu có dữ liệu trước đó
+                    const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+                    tableBody.innerHTML = '';
                     return;
                 } else {
                     document.getElementById('filterMessage').innerText = '';
@@ -255,7 +267,11 @@
 
                 // Thêm các dòng vào bảng
                 feeds.forEach(feed => {
-                    addRowToTable(feed.field1 || 'Không có dữ liệu', feed.field2 || 'Không có dữ liệu', feed.created_at ? new Date(feed.created_at).toLocaleString() : 'Không có dữ liệu');
+                    addRowToTable(
+                        feed.field1 || 'Không có dữ liệu',
+                        feed.field2 || 'Không có dữ liệu',
+                        feed.created_at ? new Date(feed.created_at).toLocaleString() : 'Không có dữ liệu'
+                    );
                     lastEntryID = feed.entry_id; // Cập nhật entry ID cuối cùng
                 });
             } catch (error) {
