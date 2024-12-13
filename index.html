@@ -79,8 +79,8 @@
     <script>
         // Hàm để lấy dữ liệu từ ThingSpeak
         async function fetchData() {
-            const channelID = '2783657'; // Thay bằng Channel ID của bạn
-            const apiKey = 'FZUQDUYN7ON76T8P';  // Thay bằng API Read Key của bạn
+            const channelID = 'YOUR_CHANNEL_ID'; // Thay bằng Channel ID của bạn
+            const apiKey = 'YOUR_READ_API_KEY';  // Thay bằng API Read Key của bạn
             const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=1`;
 
             try {
