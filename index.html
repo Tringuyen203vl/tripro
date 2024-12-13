@@ -48,15 +48,11 @@
                 // Cập nhật dữ liệu lên trang web
                 document.getElementById('field1').innerText = feed.field1 || 'Không có dữ liệu';
                 document.getElementById('field2').innerText = feed.field2 || 'Không có dữ liệu';
-                document.getElementById('field3').innerText = feed.field3 || 'Không có dữ liệu';
-                document.getElementById('field4').innerText = feed.field4 || 'Không có dữ liệu';
                 document.getElementById('timestamp').innerText = feed.created_at ? new Date(feed.created_at).toLocaleString() : 'Không có dữ liệu';
             } catch (error) {
                 console.error('Lỗi khi lấy dữ liệu:', error);
                 document.getElementById('field1').innerText = 'Lỗi';
                 document.getElementById('field2').innerText = 'Lỗi';
-                document.getElementById('field3').innerText = 'Lỗi';
-                document.getElementById('field4').innerText = 'Lỗi';
                 document.getElementById('timestamp').innerText = 'Lỗi';
             }
         }
@@ -75,8 +71,6 @@
     <div class="data-container">
         <div class="data-item">Field1: <span id="field1">Đang tải...</span></div>
         <div class="data-item">Field2: <span id="field2">Đang tải...</span></div>
-        <div class="data-item">Field3: <span id="field3">Đang tải...</span></div>
-        <div class="data-item">Field4: <span id="field4">Đang tải...</span></div>
         <div class="data-item timestamp">Thời gian: <span id="timestamp">Đang tải...</span></div>
     </div>
 </body>
