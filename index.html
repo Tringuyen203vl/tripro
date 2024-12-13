@@ -17,7 +17,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* Chỉnh sửa để không căn giữa hoàn toàn */
             min-height: 100vh;
             padding: 20px;
         }
@@ -86,25 +86,29 @@
             background-color: #45a049;
         }
 
-        /* Data list styling */
-        #dataList {
-            display: none;
+        /* Table styling */
+        #dataTable {
+            display: none; /* Ẩn bảng ban đầu */
             margin-top: 20px;
-            list-style-type: none;
-            padding: 0;
-            background-color: #ffffff;
-            border: 2px solid #4CAF50;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            max-width: 400px;
             width: 100%;
+            max-width: 800px;
+            border-collapse: collapse;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        #dataList li {
-            margin-bottom: 10px;
-            font-size: 1.1em;
-            color: #333;
+        #dataTable th, #dataTable td {
+            border: 1px solid #4CAF50;
+            padding: 12px;
+            text-align: center;
+        }
+
+        #dataTable th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #dataTable tr:nth-child(even) {
+            background-color: #f2f2f2;
         }
 
         /* Responsive Design */
@@ -112,14 +116,34 @@
             .data-item {
                 width: 100%;
             }
+
+            #dataTable {
+                width: 100%;
+            }
         }
     </style>
     <script>
+        let lastEntryID = null; // Biến để theo dõi entry ID cuối cùng đã được thêm vào bảng
+
+        // Hàm để tạo hàng mới trong bảng
+        function addRowToTable(field1, field2, timestamp) {
+            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+
+            const cell1 = newRow.insertCell(0);
+            const cell2 = newRow.insertCell(1);
+            const cell3 = newRow.insertCell(2);
+
+            cell1.innerText = field1;
+            cell2.innerText = field2;
+            cell3.innerText = timestamp;
+        }
+
         // Hàm để lấy dữ liệu từ ThingSpeak
         async function fetchData() {
             const channelID = '2783657'; // Thay bằng Channel ID của bạn
             const apiKey = 'FZUQDUYN7ON76T8P';  // Thay bằng API Read Key của bạn
-            const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=1`;
+            const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=20`;
 
             try {
                 const response = await fetch(url);
@@ -127,26 +151,80 @@
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 const data = await response.json();
-                const feed = data.feeds[0];
+                const feeds = data.feeds;
+
+                if (feeds.length === 0) {
+                    console.warn('Không có dữ liệu từ ThingSpeak.');
+                    return;
+                }
+
+                const latestFeed = feeds[feeds.length - 1];
 
                 // Cập nhật dữ liệu lên trang web
-                document.getElementById('field1').innerText = feed.field1 || 'Không có dữ liệu';
-                document.getElementById('field2').innerText = feed.field2 || 'Không có dữ liệu';
-                document.getElementById('timestamp').innerText = feed.created_at ? new Date(feed.created_at).toLocaleString() : 'Không có dữ liệu';
+                document.getElementById('field1').innerText = latestFeed.field1 || 'Không có dữ liệu';
+                document.getElementById('field2').innerText = latestFeed.field2 || 'Không có dữ liệu';
+                document.getElementById('timestamp').innerText = latestFeed.created_at ? new Date(latestFeed.created_at).toLocaleString() : 'Không có dữ liệu';
 
-                // Cập nhật dữ liệu trong danh sách
-                document.getElementById('listField1').innerText = feed.field1 || 'Không có dữ liệu';
-                document.getElementById('listField2').innerText = feed.field2 || 'Không có dữ liệu';
-                document.getElementById('listTimestamp').innerText = feed.created_at ? new Date(feed.created_at).toLocaleString() : 'Không có dữ liệu';
+                // Cập nhật dữ liệu trong bảng nếu bảng đang hiển thị
+                if (document.getElementById('dataTable').style.display === 'table') {
+                    // Kiểm tra xem entry đã tồn tại chưa
+                    if (latestFeed.entry_id !== lastEntryID) {
+                        addRowToTable(latestFeed.field1 || 'Không có dữ liệu', latestFeed.field2 || 'Không có dữ liệu', latestFeed.created_at ? new Date(latestFeed.created_at).toLocaleString() : 'Không có dữ liệu');
+                        lastEntryID = latestFeed.entry_id;
+                    }
+                }
             } catch (error) {
                 console.error('Lỗi khi lấy dữ liệu:', error);
                 document.getElementById('field1').innerText = 'Lỗi';
                 document.getElementById('field2').innerText = 'Lỗi';
                 document.getElementById('timestamp').innerText = 'Lỗi';
+            }
+        }
 
-                document.getElementById('listField1').innerText = 'Lỗi';
-                document.getElementById('listField2').innerText = 'Lỗi';
-                document.getElementById('listTimestamp').innerText = 'Lỗi';
+        // Hàm để lấy dữ liệu lịch sử và tạo bảng
+        async function fetchHistoricalData() {
+            const channelID = '2783657'; // Thay bằng Channel ID của bạn
+            const apiKey = 'FZUQDUYN7ON76T8P';  // Thay bằng API Read Key của bạn
+            const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=20`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                const feeds = data.feeds;
+
+                if (feeds.length === 0) {
+                    console.warn('Không có dữ liệu từ ThingSpeak.');
+                    return;
+                }
+
+                // Xóa dữ liệu cũ trong bảng
+                const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+                tableBody.innerHTML = '';
+
+                // Thêm các dòng vào bảng
+                feeds.forEach(feed => {
+                    addRowToTable(feed.field1 || 'Không có dữ liệu', feed.field2 || 'Không có dữ liệu', feed.created_at ? new Date(feed.created_at).toLocaleString() : 'Không có dữ liệu');
+                    lastEntryID = feed.entry_id; // Cập nhật entry ID cuối cùng
+                });
+            } catch (error) {
+                console.error('Lỗi khi lấy dữ liệu lịch sử:', error);
+            }
+        }
+
+        // Hàm để toggle hiển thị bảng
+        async function toggleTable() {
+            const dataTable = document.getElementById('dataTable');
+            const toggleButton = document.getElementById('toggleButton');
+            if (dataTable.style.display === 'none' || dataTable.style.display === '') {
+                dataTable.style.display = 'table';
+                toggleButton.innerText = 'Ẩn bảng dữ liệu';
+                await fetchHistoricalData(); // Lấy dữ liệu lịch sử khi bảng được hiển thị
+            } else {
+                dataTable.style.display = 'none';
+                toggleButton.innerText = 'Hiển thị danh sách';
             }
         }
 
@@ -156,19 +234,9 @@
             setInterval(fetchData, 3000); // Lấy dữ liệu mỗi 3 giây
         }
 
-        // Hàm để toggle hiển thị danh sách
-        function toggleList() {
-            const dataList = document.getElementById('dataList');
-            if (dataList.style.display === 'none' || dataList.style.display === '') {
-                dataList.style.display = 'block';
-            } else {
-                dataList.style.display = 'none';
-            }
-        }
-
         window.onload = function() {
             startAutoUpdate();
-            document.getElementById('toggleButton').addEventListener('click', toggleList);
+            document.getElementById('toggleButton').addEventListener('click', toggleTable);
         };
     </script>
 </head>
@@ -189,14 +257,21 @@
         </div>
     </div>
 
-    <!-- Nút để hiển thị danh sách -->
+    <!-- Nút để hiển thị bảng dữ liệu -->
     <button id="toggleButton">Hiển thị danh sách</button>
 
-    <!-- Danh sách dữ liệu -->
-    <ul id="dataList">
-        <li><strong>ESP ID:</strong> <span id="listField1">Đang tải...</span></li>
-        <li><strong>Fingerprint ID:</strong> <span id="listField2">Đang tải...</span></li>
-        <li><strong>Thời gian:</strong> <span id="listTimestamp">Đang tải...</span></li>
-    </ul>
+    <!-- Bảng dữ liệu -->
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>ESP ID</th>
+                <th>Fingerprint ID</th>
+                <th>Thời gian</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dữ liệu sẽ được thêm vào đây -->
+        </tbody>
+    </table>
 </body>
 </html>
