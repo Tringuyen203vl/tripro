@@ -1,42 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Thông Tin Từ ThingSpeak</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-            background-color: #f2f2f2;
-        }
-        h1 {
-            color: #333;
-        }
-        .data-container {
-            margin-top: 30px;
-        }
-        .data-field {
-            background-color: #fff;
-            padding: 20px;
-            margin: 10px auto;
-            width: 300px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .data-field h2 {
-            margin-bottom: 10px;
-            color: #555;
-        }
-        .data-field p {
-            font-size: 1.2em;
-            color: #000;
-        }
-    </style>
+    <title>Dashboard Cập Nhật Tự Động</title>
     <script>
-        async function fetchThingSpeakData() {
-            const channelID = '2783657'; // Thay YOUR_CHANNEL_ID bằng Channel ID của bạn
-            const apiKey = 'FZUQDUYN7ON76T8P'; // Thay YOUR_READ_API_KEY bằng Read API Key của bạn
+        // Hàm để lấy dữ liệu từ ThingSpeak
+        async function fetchData() {
+            const channelID = 'YOUR_CHANNEL_ID';
+            const apiKey = 'YOUR_READ_API_KEY';
             const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=1`;
 
             try {
@@ -44,35 +15,28 @@
                 const data = await response.json();
                 const feed = data.feeds[0];
 
-                document.getElementById('espID').innerText = feed.field1 || 'N/A';
-                document.getElementById('fingerprintID').innerText = feed.field2 || 'N/A';
-                document.getElementById('timestamp').innerText = feed.field3 || 'N/A';
+                // Cập nhật dữ liệu lên trang web
+                document.getElementById('field1').innerText = feed.field1;
+                document.getElementById('field2').innerText = feed.field2;
+                document.getElementById('timestamp').innerText = feed.created_at;
             } catch (error) {
-                console.error('Error fetching data:', error);
-                document.getElementById('espID').innerText = 'Error';
-                document.getElementById('fingerprintID').innerText = 'Error';
-                document.getElementById('timestamp').innerText = 'Error';
+                console.error('Lỗi khi lấy dữ liệu:', error);
             }
         }
 
-        window.onload = fetchThingSpeakData;
+        // Hàm để khởi động quá trình tự động cập nhật
+        function startAutoUpdate() {
+            fetchData(); // Lấy dữ liệu ngay lập tức khi trang tải
+            setInterval(fetchData, 10000); // Lấy dữ liệu mỗi 10 giây
+        }
+
+        window.onload = startAutoUpdate;
     </script>
 </head>
 <body>
-    <h1>Thông Tin Từ ThingSpeak</h1>
-    <div class="data-container">
-        <div class="data-field">
-            <h2>ESP ID</h2>
-            <p id="espID">Loading...</p>
-        </div>
-        <div class="data-field">
-            <h2>Fingerprint ID</h2>
-            <p id="fingerprintID">Loading...</p>
-        </div>
-        <div class="data-field">
-            <h2>Timestamp</h2>
-            <p id="timestamp">Loading...</p>
-        </div>
-    </div>
+    <h1>Dashboard ThingSpeak</h1>
+    <p>Field1: <span id="field1">Đang tải...</span></p>
+    <p>Field2: <span id="field2">Đang tải...</span></p>
+    <p>Thời gian: <span id="timestamp">Đang tải...</span></p>
 </body>
 </html>
