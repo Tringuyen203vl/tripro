@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng Nhập Dashboard</title>
+    <style>
+        /* Reset một số thiết lập mặc định */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+
+        .login-container h2 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .login-container label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+
+        .login-container button:hover {
+            background-color: #45a049;
+        }
+
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Đăng Nhập</h2>
+        <div id="errorMessage" class="error-message"></div>
+        <form id="loginForm">
+            <label for="username">Tên Đăng Nhập:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password">Mật Khẩu:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Đăng Nhập</button>
+        </form>
+    </div>
+
+    <script>
+        // Thông tin đăng nhập mẫu (Trong thực tế, bạn nên kiểm tra trên server)
+        const validUsername = 'admin';
+        const validPassword = 'password123';
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Ngăn chặn form gửi đi
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (username === validUsername && password === validPassword) {
+                // Lưu trạng thái đăng nhập vào sessionStorage
+                sessionStorage.setItem('isLoggedIn', 'true');
+                // Chuyển hướng đến trang dashboard
+                window.location.href = 'dashboard.html';
+            } else {
+                // Hiển thị thông báo lỗi
+                errorMessage.innerText = 'Tên đăng nhập hoặc mật khẩu không đúng.';
+            }
+        });
+    </script>
+</body>
+</html>
