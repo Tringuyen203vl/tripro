@@ -1,217 +1,78 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard ThingSpeak</title>
-    <!-- Thêm Google Fonts để cải thiện font chữ -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"> 
-
-    <!-- Thêm Chart.js từ CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <title>Thông Tin Từ ThingSpeak</title>
     <style>
-        /* Reset một số thiết lập mặc định */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f4f6f8;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            min-height: 100vh;
-            padding: 20px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f2f2f2;
         }
-
         h1 {
             color: #333;
-            margin-bottom: 30px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
-
         .data-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            width: 100%;
-            max-width: 1000px;
-            margin-bottom: 40px;
+            margin-top: 30px;
         }
-
-        .data-item {
-            background-color: #ffffff;
-            border: 2px solid #4CAF50;
-            border-radius: 10px;
+        .data-field {
+            background-color: #fff;
             padding: 20px;
-            width: 220px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin: 10px auto;
+            width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
-        .data-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
-        }
-
-        .data-item h2 {
-            font-size: 1.2em;
-            color: #4CAF50;
+        .data-field h2 {
             margin-bottom: 10px;
-        }
-
-        .data-item p {
-            font-size: 1.5em;
             color: #555;
         }
-
-        .timestamp {
-            font-size: 0.9em;
-            color: #888;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        /* Biểu đồ */
-        .chart-container {
-            background-color: #ffffff;
-            border: 2px solid #2196F3;
-            border-radius: 10px;
-            padding: 20px;
-            width: 100%;
-            max-width: 800px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .data-item {
-                width: 100%;
-            }
+        .data-field p {
+            font-size: 1.2em;
+            color: #000;
         }
     </style>
-
     <script>
-        let field1Chart; // Biến toàn cục để lưu trữ biểu đồ Field1
-
-        // Hàm để lấy dữ liệu từ ThingSpeak
-        async function fetchData() {
-            const channelID = 'YOUR_CHANNEL_ID'; // Thay bằng Channel ID của bạn
-            const apiKey = 'YOUR_READ_API_KEY';  // Thay bằng API Read Key của bạn
-            const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=20`;
+        async function fetchThingSpeakData() {
+            const channelID = '2783657'; // Thay YOUR_CHANNEL_ID bằng Channel ID của bạn
+            const apiKey = 'FZUQDUYN7ON76T8P'; // Thay YOUR_READ_API_KEY bằng Read API Key của bạn
+            const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=1`;
 
             try {
                 const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
                 const data = await response.json();
-                const feeds = data.feeds;
+                const feed = data.feeds[0];
 
-                if (feeds.length === 0) {
-                    throw new Error('Không có dữ liệu từ ThingSpeak.');
-                }
-
-                const latestFeed = feeds[feeds.length - 1];
-
-                // Cập nhật dữ liệu lên trang web
-                document.getElementById('field1').innerText = latestFeed.field1 || 'Không có dữ liệu';
-                document.getElementById('field2').innerText = latestFeed.field2 || 'Không có dữ liệu';
-                document.getElementById('timestamp').innerText = latestFeed.created_at ? new Date(latestFeed.created_at).toLocaleString() : 'Không có dữ liệu';
-
-                // Chuẩn bị dữ liệu cho biểu đồ
-                const labels = feeds.map(feed => new Date(feed.created_at).toLocaleTimeString());
-                const dataField1 = feeds.map(feed => parseFloat(feed.field1) || 0);
-
-                // Nếu biểu đồ chưa được tạo, tạo mới
-                if (!field1Chart) {
-                    const ctx = document.getElementById('field1Chart').getContext('2d');
-                    field1Chart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Field1',
-                                data: dataField1,
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                fill: true,
-                                tension: 0.1
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                x: {
-                                    display: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Thời Gian'
-                                    }
-                                },
-                                y: {
-                                    display: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Giá Trị'
-                                    }
-                                }
-                            }
-                        }
-                    });
-                } else {
-                    // Cập nhật dữ liệu biểu đồ
-                    field1Chart.data.labels = labels;
-                    field1Chart.data.datasets[0].data = dataField1;
-                    field1Chart.update();
-                }
-
+                document.getElementById('espID').innerText = feed.field1 || 'N/A';
+                document.getElementById('fingerprintID').innerText = feed.field2 || 'N/A';
+                document.getElementById('timestamp').innerText = feed.field3 || 'N/A';
             } catch (error) {
-                console.error('Lỗi khi lấy dữ liệu:', error);
-                document.getElementById('field1').innerText = 'Lỗi';
-                document.getElementById('field2').innerText = 'Lỗi';
-                document.getElementById('timestamp').innerText = 'Lỗi';
+                console.error('Error fetching data:', error);
+                document.getElementById('espID').innerText = 'Error';
+                document.getElementById('fingerprintID').innerText = 'Error';
+                document.getElementById('timestamp').innerText = 'Error';
             }
         }
 
-        // Hàm để khởi động quá trình tự động cập nhật
-        function startAutoUpdate() {
-            fetchData(); // Lấy dữ liệu ngay lập tức khi trang tải
-            setInterval(fetchData, 3000); // Lấy dữ liệu mỗi 3 giây
-        }
-
-        window.onload = startAutoUpdate;
+        window.onload = fetchThingSpeakData;
     </script>
 </head>
 <body>
-    <h1>Dashboard ThingSpeak</h1>
+    <h1>Thông Tin Từ ThingSpeak</h1>
     <div class="data-container">
-        <div class="data-item">
-            <h2>Field1</h2>
-            <p id="field1">Đang tải...</p>
+        <div class="data-field">
+            <h2>ESP ID</h2>
+            <p id="espID">Loading...</p>
         </div>
-        <div class="data-item">
-            <h2>Field2</h2>
-            <p id="field2">Đang tải...</p>
+        <div class="data-field">
+            <h2>Fingerprint ID</h2>
+            <p id="fingerprintID">Loading...</p>
         </div>
-        <div class="data-item" style="width: 100%; text-align: center;">
-            <h2>Thời gian</h2>
-            <p id="timestamp" class="timestamp">Đang tải...</p>
+        <div class="data-field">
+            <h2>Timestamp</h2>
+            <p id="timestamp">Loading...</p>
         </div>
-    </div>
-
-    <div class="chart-container">
-        <h2>Biểu Đồ Field1</h2>
-        <canvas id="field1Chart"></canvas>
     </div>
 </body>
 </html>
