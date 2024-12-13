@@ -121,6 +121,52 @@
                 width: 100%;
             }
         }
+
+        /* Filter container styling */
+        .filter-container {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-container label {
+            font-size: 1em;
+            color: #333;
+        }
+
+        .filter-container input {
+            padding: 8px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 150px;
+        }
+
+        #filterButton {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #filterButton:hover {
+            background-color: #0b7dda;
+        }
+
+        .filter-message {
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1em;
+            color: red;
+        }
     </style>
     <script>
         let lastEntryID = null; // Biến để theo dõi entry ID cuối cùng đã được thêm vào bảng
@@ -182,10 +228,10 @@
         }
 
         // Hàm để lấy dữ liệu lịch sử và tạo bảng
-        async function fetchHistoricalData() {
+        async function fetchHistoricalData(startDate, endDate) {
             const channelID = '2783657'; // Thay bằng Channel ID của bạn
             const apiKey = 'FZUQDUYN7ON76T8P';  // Thay bằng API Read Key của bạn
-            const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=20`;
+            const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&start=${startDate}&end=${endDate}&timezone=UTC`;
 
             try {
                 const response = await fetch(url);
@@ -196,8 +242,11 @@
                 const feeds = data.feeds;
 
                 if (feeds.length === 0) {
-                    console.warn('Không có dữ liệu từ ThingSpeak.');
+                    // Hiển thị thông báo không có dữ liệu
+                    document.getElementById('filterMessage').innerText = 'Dữ liệu không tồn tại.';
                     return;
+                } else {
+                    document.getElementById('filterMessage').innerText = '';
                 }
 
                 // Xóa dữ liệu cũ trong bảng
@@ -211,6 +260,7 @@
                 });
             } catch (error) {
                 console.error('Lỗi khi lấy dữ liệu lịch sử:', error);
+                document.getElementById('filterMessage').innerText = 'Có lỗi xảy ra khi lọc dữ liệu.';
             }
         }
 
@@ -234,9 +284,56 @@
             setInterval(fetchData, 3000); // Lấy dữ liệu mỗi 3 giây
         }
 
+        // Hàm để chuyển đổi định dạng ngày từ dd/mm/yyyy sang yyyy-mm-dd
+        function convertDateFormat(dateStr) {
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) {
+                return null;
+            }
+            const day = parts[0].padStart(2, '0');
+            const month = parts[1].padStart(2, '0');
+            const year = parts[2];
+            return `${year}-${month}-${day}`;
+        }
+
+        // Hàm để lọc dữ liệu theo ngày tháng
+        async function filterData() {
+            const startDateInput = document.getElementById('startDate').value.trim();
+            const endDateInput = document.getElementById('endDate').value.trim();
+            const filterMessage = document.getElementById('filterMessage');
+
+            // Kiểm tra xem cả hai trường đã được nhập đầy đủ chưa
+            if (startDateInput === '' || endDateInput === '') {
+                filterMessage.style.color = 'red';
+                filterMessage.innerText = 'Vui lòng nhập đầy đủ ngày bắt đầu và kết thúc.';
+                return;
+            }
+
+            // Chuyển đổi định dạng ngày
+            const startDate = convertDateFormat(startDateInput);
+            const endDate = convertDateFormat(endDateInput);
+
+            if (!startDate || !endDate) {
+                filterMessage.style.color = 'red';
+                filterMessage.innerText = 'Định dạng ngày không hợp lệ. Vui lòng nhập theo định dạng dd/mm/yyyy.';
+                return;
+            }
+
+            // Kiểm tra logic ngày tháng
+            if (new Date(startDate) > new Date(endDate)) {
+                filterMessage.style.color = 'red';
+                filterMessage.innerText = 'Ngày bắt đầu không được lớn hơn ngày kết thúc.';
+                return;
+            }
+
+            // Gọi hàm fetchHistoricalData với ngày đã chọn
+            await fetchHistoricalData(startDate, endDate);
+        }
+
         window.onload = function() {
             startAutoUpdate();
             document.getElementById('toggleButton').addEventListener('click', toggleTable);
+            document.getElementById('filterButton').addEventListener('click', filterData);
         };
     </script>
 </head>
@@ -255,6 +352,16 @@
             <h2>Thời gian</h2>
             <p id="timestamp" class="timestamp">Đang tải...</p>
         </div>
+    </div>
+
+    <!-- Thanh nhập ngày và nút lọc dữ liệu -->
+    <div class="filter-container">
+        <label for="startDate">Ngày bắt đầu:</label>
+        <input type="text" id="startDate" placeholder="dd/mm/yyyy">
+        <label for="endDate">Ngày kết thúc:</label>
+        <input type="text" id="endDate" placeholder="dd/mm/yyyy">
+        <button id="filterButton">Lọc dữ liệu</button>
+        <div id="filterMessage" class="filter-message"></div>
     </div>
 
     <!-- Nút để hiển thị bảng dữ liệu -->
