@@ -4,76 +4,30 @@
     <meta charset="UTF-8">
     <title>Dashboard Cập Nhật Tự Động</title>
     <style>
-        /* Reset một số thiết lập mặc định */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f6f8;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding-top: 50px;
         }
-
         h1 {
             color: #333;
-            margin-bottom: 30px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
-
         .data-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            width: 100%;
-            max-width: 800px;
-        }
-
-        .data-item {
-            background-color: #ffffff;
-            border: 2px solid #4CAF50;
-            border-radius: 10px;
+            background-color: #fff;
             padding: 20px;
-            width: 220px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 20px auto;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
-        .data-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
-        }
-
-        .data-item h2 {
+        .data-item {
+            margin: 10px 0;
             font-size: 1.2em;
-            color: #4CAF50;
-            margin-bottom: 10px;
         }
-
-        .data-item p {
-            font-size: 1.5em;
-            color: #555;
-        }
-
         .timestamp {
+            color: #666;
             font-size: 0.9em;
-            color: #888;
-            margin-top: 10px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .data-item {
-                width: 100%;
-            }
         }
     </style>
     <script>
@@ -94,11 +48,15 @@
                 // Cập nhật dữ liệu lên trang web
                 document.getElementById('field1').innerText = feed.field1 || 'Không có dữ liệu';
                 document.getElementById('field2').innerText = feed.field2 || 'Không có dữ liệu';
+                document.getElementById('field3').innerText = feed.field3 || 'Không có dữ liệu';
+                document.getElementById('field4').innerText = feed.field4 || 'Không có dữ liệu';
                 document.getElementById('timestamp').innerText = feed.created_at ? new Date(feed.created_at).toLocaleString() : 'Không có dữ liệu';
             } catch (error) {
                 console.error('Lỗi khi lấy dữ liệu:', error);
                 document.getElementById('field1').innerText = 'Lỗi';
                 document.getElementById('field2').innerText = 'Lỗi';
+                document.getElementById('field3').innerText = 'Lỗi';
+                document.getElementById('field4').innerText = 'Lỗi';
                 document.getElementById('timestamp').innerText = 'Lỗi';
             }
         }
@@ -115,18 +73,11 @@
 <body>
     <h1>Dashboard ThingSpeak</h1>
     <div class="data-container">
-        <div class="data-item">
-            <h2>Field1</h2>
-            <p id="field1">Đang tải...</p>
-        </div>
-        <div class="data-item">
-            <h2>Field2</h2>
-            <p id="field2">Đang tải...</p>
-        </div>
-        <div class="data-item" style="width: 100%; text-align: center;">
-            <h2>Thời gian</h2>
-            <p id="timestamp" class="timestamp">Đang tải...</p>
-        </div>
+        <div class="data-item">Field1: <span id="field1">Đang tải...</span></div>
+        <div class="data-item">Field2: <span id="field2">Đang tải...</span></div>
+        <div class="data-item">Field3: <span id="field3">Đang tải...</span></div>
+        <div class="data-item">Field4: <span id="field4">Đang tải...</span></div>
+        <div class="data-item timestamp">Thời gian: <span id="timestamp">Đang tải...</span></div>
     </div>
 </body>
 </html>
