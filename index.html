@@ -1,77 +1,78 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard Cập Nhật Tự Động</title>
+    <title>Thông Tin Từ ThingSpeak</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #f0f0f0;
-            padding-top: 50px;
+            padding: 50px;
+            background-color: #f2f2f2;
         }
         h1 {
             color: #333;
         }
         .data-container {
+            margin-top: 30px;
+        }
+        .data-field {
             background-color: #fff;
             padding: 20px;
-            margin: 20px auto;
-            border-radius: 10px;
+            margin: 10px auto;
             width: 300px;
+            border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .data-item {
-            margin: 10px 0;
-            font-size: 1.2em;
+        .data-field h2 {
+            margin-bottom: 10px;
+            color: #555;
         }
-        .timestamp {
-            color: #666;
-            font-size: 0.9em;
+        .data-field p {
+            font-size: 1.2em;
+            color: #000;
         }
     </style>
     <script>
-        // Hàm để lấy dữ liệu từ ThingSpeak
-        async function fetchData() {
-            const channelID = 'YOUR_CHANNEL_ID'; // Thay bằng Channel ID của bạn
-            const apiKey = 'YOUR_READ_API_KEY';  // Thay bằng API Read Key của bạn
+        async function fetchThingSpeakData() {
+            const channelID = '2783657'; // Thay YOUR_CHANNEL_ID bằng Channel ID của bạn
+            const apiKey = 'FZUQDUYN7ON76T8P'; // Thay YOUR_READ_API_KEY bằng Read API Key của bạn
             const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${apiKey}&results=1`;
 
             try {
                 const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
                 const data = await response.json();
                 const feed = data.feeds[0];
 
-                // Cập nhật dữ liệu lên trang web
-                document.getElementById('field1').innerText = feed.field1 || 'Không có dữ liệu';
-                document.getElementById('field2').innerText = feed.field2 || 'Không có dữ liệu';
-                document.getElementById('timestamp').innerText = feed.created_at ? new Date(feed.created_at).toLocaleString() : 'Không có dữ liệu';
+                document.getElementById('espID').innerText = feed.field1 || 'N/A';
+                document.getElementById('fingerprintID').innerText = feed.field2 || 'N/A';
+                document.getElementById('timestamp').innerText = feed.field3 || 'N/A';
             } catch (error) {
-                console.error('Lỗi khi lấy dữ liệu:', error);
-                document.getElementById('field1').innerText = 'Lỗi';
-                document.getElementById('field2').innerText = 'Lỗi';
-                document.getElementById('timestamp').innerText = 'Lỗi';
+                console.error('Error fetching data:', error);
+                document.getElementById('espID').innerText = 'Error';
+                document.getElementById('fingerprintID').innerText = 'Error';
+                document.getElementById('timestamp').innerText = 'Error';
             }
         }
 
-        // Hàm để khởi động quá trình tự động cập nhật
-        function startAutoUpdate() {
-            fetchData(); // Lấy dữ liệu ngay lập tức khi trang tải
-            setInterval(fetchData, 3000); // Lấy dữ liệu mỗi 3 giây
-        }
-
-        window.onload = startAutoUpdate;
+        window.onload = fetchThingSpeakData;
     </script>
 </head>
 <body>
-    <h1>Dashboard ThingSpeak</h1>
+    <h1>Thông Tin Từ ThingSpeak</h1>
     <div class="data-container">
-        <div class="data-item">Field1: <span id="field1">Đang tải...</span></div>
-        <div class="data-item">Field2: <span id="field2">Đang tải...</span></div>
-        <div class="data-item timestamp">Thời gian: <span id="timestamp">Đang tải...</span></div>
+        <div class="data-field">
+            <h2>ESP ID</h2>
+            <p id="espID">Loading...</p>
+        </div>
+        <div class="data-field">
+            <h2>Fingerprint ID</h2>
+            <p id="fingerprintID">Loading...</p>
+        </div>
+        <div class="data-field">
+            <h2>Timestamp</h2>
+            <p id="timestamp">Loading...</p>
+        </div>
     </div>
 </body>
 </html>
