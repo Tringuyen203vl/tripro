@@ -215,7 +215,11 @@
                 if (document.getElementById('dataTable').style.display === 'table') {
                     // Kiểm tra xem entry đã tồn tại chưa
                     if (latestFeed.entry_id !== lastEntryID) {
-                        addRowToTable(latestFeed.field1 || 'Không có dữ liệu', latestFeed.field2 || 'Không có dữ liệu', latestFeed.created_at ? new Date(latestFeed.created_at).toLocaleString() : 'Không có dữ liệu');
+                        addRowToTable(
+                            latestFeed.field1 || 'Không có dữ liệu',
+                            latestFeed.field2 || 'Không có dữ liệu',
+                            latestFeed.created_at ? new Date(latestFeed.created_at).toLocaleString() : 'Không có dữ liệu'
+                        );
                         lastEntryID = latestFeed.entry_id;
                     }
                 }
@@ -253,9 +257,8 @@
                 if (feeds.length === 0) {
                     // Hiển thị thông báo không có dữ liệu
                     document.getElementById('filterMessage').innerText = 'Dữ liệu không tồn tại.';
-                    // Xóa bảng nếu có dữ liệu trước đó
-                    const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-                    tableBody.innerHTML = '';
+                    // Ẩn bảng nếu đang hiển thị
+                    document.getElementById('dataTable').style.display = 'none';
                     return;
                 } else {
                     document.getElementById('filterMessage').innerText = '';
@@ -274,9 +277,14 @@
                     );
                     lastEntryID = feed.entry_id; // Cập nhật entry ID cuối cùng
                 });
+
+                // Hiển thị bảng dữ liệu
+                document.getElementById('dataTable').style.display = 'table';
             } catch (error) {
                 console.error('Lỗi khi lấy dữ liệu lịch sử:', error);
                 document.getElementById('filterMessage').innerText = 'Có lỗi xảy ra khi lọc dữ liệu.';
+                // Ẩn bảng nếu có lỗi
+                document.getElementById('dataTable').style.display = 'none';
             }
         }
 
